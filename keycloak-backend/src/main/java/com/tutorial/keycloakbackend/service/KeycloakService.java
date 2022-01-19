@@ -2,7 +2,7 @@ package com.tutorial.keycloakbackend.service;
 
 
 import com.tutorial.keycloakbackend.dto.ResponseMessage;
-import com.tutorial.keycloakbackend.model.User;
+import com.tutorial.keycloakbackend.dto.UserDataOnly;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -38,7 +38,7 @@ public class KeycloakService {
     @Value("${app.master.clientId}")
     private String master_clientId;
 
-    public Object[] createUser(User user){
+    public Object[] createUser(UserDataOnly user){
         ResponseMessage message = new ResponseMessage();
         int statusId = 0;
          try {
