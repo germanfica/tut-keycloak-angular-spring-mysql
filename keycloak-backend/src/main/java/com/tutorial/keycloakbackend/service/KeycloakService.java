@@ -3,6 +3,8 @@ package com.tutorial.keycloakbackend.service;
 
 import com.tutorial.keycloakbackend.dto.ResponseMessage;
 import com.tutorial.keycloakbackend.dto.UserDataOnly;
+import com.tutorial.keycloakbackend.model.User;
+import com.tutorial.keycloakbackend.repository.UserRepository;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -11,6 +13,7 @@ import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +22,7 @@ import java.util.Arrays;
 
 @Service
 public class KeycloakService {
-
+    // == fields ==
     @Value("${keycloak.auth-server-url}")
     private String server_url;
 
@@ -38,16 +41,24 @@ public class KeycloakService {
     @Value("${app.master.clientId}")
     private String master_clientId;
 
-    public Object[] createUser(UserDataOnly user){
+    private UserRepository userRepository;
+
+    // == constructors ==
+    @Autowired
+    private KeycloakService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public Object[] createUser(UserDataOnly userDataOnly){
         ResponseMessage message = new ResponseMessage();
         int statusId = 0;
          try {
              UsersResource usersResource = getUsersResource();
              UserRepresentation userRepresentation = new UserRepresentation();
-             userRepresentation.setUsername(user.getUsername());
-             userRepresentation.setEmail(user.getEmail());
-             userRepresentation.setFirstName(user.getFirstName());
-             userRepresentation.setLastName(user.getLastName());
+             userRepresentation.setUsername(userDataOnly.getUsername());
+             userRepresentation.setEmail(userDataOnly.getEmail());
+             userRepresentation.setFirstName(userDataOnly.getFirstName());
+             userRepresentation.setLastName(userDataOnly.getLastName());
              userRepresentation.setEnabled(true);
 
              Response result = usersResource.create(userRepresentation);
@@ -59,12 +70,14 @@ public class KeycloakService {
                  CredentialRepresentation passwordCredential = new CredentialRepresentation();
                  passwordCredential.setTemporary(false);
                  passwordCredential.setType(CredentialRepresentation.PASSWORD);
-                 passwordCredential.setValue(user.getPassword());
+                 passwordCredential.setValue(userDataOnly.getPassword());
                  usersResource.get(userId).resetPassword(passwordCredential);
 
                  RealmResource realmResource = getRealmResource();
                  RoleRepresentation roleRepresentation = realmResource.roles().get("realm-user").toRepresentation();
                  realmResource.users().get(userId).roles().realmLevel().add(Arrays.asList(roleRepresentation));
+                 // Create User in the platform db
+                 userRepository.save(new User(userDataOnly.getUsername()));
                  message.setMessage("usuario creado con éxito");
              }else if(statusId == 409){
                  message.setMessage("ese usuario ya existe");
