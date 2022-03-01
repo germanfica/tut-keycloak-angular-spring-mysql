@@ -8,7 +8,7 @@ This repository provides an angular and maven project for managing a foo’s inf
 ![keykloak_preview](https://user-images.githubusercontent.com/15948693/149616700-11c35e8a-5d2d-4d8b-a319-e0a4e02a9389.png)
 
 ## Getting Started
-Follow the below instructions to get started with Guess the Number Game source code:
+Follow the below instructions to get started with the source code:
 - [Make sure you have all Requirements](#requirements)
 - [Setup Keykloak](#keycloak-getting-started)
 - [Download Source Code](#download)
